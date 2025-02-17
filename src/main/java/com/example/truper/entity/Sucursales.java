@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity(name ="Sucursales")
 @Table(name = "sucursales")
 @Getter
@@ -20,7 +22,8 @@ public class Sucursales {
     @Column(nullable = false)
     private String nombre;
 
-    @OneToMany(mappedBy = "sucursales", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "sucursal", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     List<Ordenes> ordenes;
 
 }

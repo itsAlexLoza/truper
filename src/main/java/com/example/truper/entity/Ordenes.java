@@ -1,14 +1,17 @@
 package com.example.truper.entity;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import dto.CrearOrden;
-import dto.ProductoDto;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity(name = "Ordenes")
@@ -16,6 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Data
+@NoArgsConstructor
 public class Ordenes {
 
     @Id
@@ -26,22 +30,26 @@ public class Ordenes {
     @Column(nullable = false)
     private Double total;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "sucursal_id")
+    @JsonBackReference
     private Sucursales sucursal;
 
-    @OneToMany(mappedBy = "Ordenes", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "orden", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Productos> productos;
 
-    public Ordenes(CrearOrden data){
+    public Ordenes(CrearOrden data) {
         this.fecha = data.fecha();
         this.total = data.total();
+        this.sucursal = new Sucursales();
         this.sucursal.setNombre(data.nombreSucursal());
-        List<Productos> productsList = new ArrayList<>();
-        for (ProductoDto dto : data.productos()){
-
-        }
-        this.productos = productsList;
+        this.productos = data.productos().stream()
+                .map(dto -> {
+                    Productos producto = new Productos(dto);
+                    producto.setOrden(this);
+                    return producto;
+                })
+                .collect(Collectors.toList());
     }
-
 }

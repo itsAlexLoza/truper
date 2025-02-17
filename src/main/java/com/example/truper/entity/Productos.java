@@ -1,6 +1,7 @@
 package com.example.truper.entity;
 
-import dto.CrearOrden;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import dto.ProductoDto;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -23,11 +24,14 @@ public class Productos {
     private String descripcion;
     private Double precio;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "orden_id")
+    @JsonBackReference
     private Ordenes orden;
 
     public Productos(ProductoDto data){
-
+        this.codigo = data.codigo();
+        this.descripcion = data.descripcion();
+        this.precio = data.precio();
     }
 }
